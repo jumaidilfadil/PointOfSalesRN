@@ -5,8 +5,7 @@ import {createStackNavigator} from 'react-navigation-stack';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import Login from './src/screens/Login';
-import Checkout from './src/screens/Dashboard/Checkout';
-import History from './src/screens/Dashboard/History';
+import Dashboard from './src/screens/Dashboard';
 
 class AuthLoading extends Component {
   constructor() {
@@ -33,10 +32,16 @@ class AuthLoading extends Component {
   }
 }
 
-const AppStack = createStackNavigator({
-  Checkout,
-  History,
-});
+const AppStack = createStackNavigator(
+  {
+    Dashboard,
+  },
+  {
+    defaultNavigationOptions: {
+      header: null,
+    },
+  },
+);
 const AuthStack = createStackNavigator({Login});
 
 export default createAppContainer(

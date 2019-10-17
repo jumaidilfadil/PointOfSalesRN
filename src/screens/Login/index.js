@@ -58,7 +58,7 @@ export default class Login extends Component {
   render() {
     return (
       <>
-        <StatusBar backgroundColor="#f44336" barStyle="light-content" />
+        <StatusBar backgroundColor="#ba000d" barStyle="light-content" />
         <KeyboardAvoidingView style={styles.container} behavior="padding">
           <View style={styles.logoContainer}>
             <Image style={styles.logo} source={bgLogin} />

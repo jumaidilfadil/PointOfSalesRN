@@ -1,10 +1,22 @@
 import React, {Component} from 'react';
-import {StyleSheet} from 'react-native';
-import {Container, Header, Tabs, Tab} from 'native-base';
+import {StyleSheet, ToastAndroid, Alert} from 'react-native';
+import {
+  Container,
+  Header,
+  Tabs,
+  Tab,
+  TabHeading,
+  Body,
+  Title,
+  Icon,
+  Text,
+  Badge,
+} from 'native-base';
 import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
 import dateFormat from 'dateformat';
 
+import {API} from '../../configs/api';
 import Menu from './Menu';
 import Cart from './Cart';
 
@@ -12,7 +24,7 @@ export default class Home extends Component {
   constructor() {
     super();
     this.state = {
-      data: [],
+      data: null,
       totalPage: '',
       fabActive: false,
       selectedId: [],
@@ -27,7 +39,7 @@ export default class Home extends Component {
   }
 
   getProducts = () => {
-    let url = `http://10.0.2.2:5000/api/v1/product`;
+    let url = `${API.baseUrl}/api/v1/product`;
     axios
       .get(url)
       .then(result => {
@@ -101,7 +113,7 @@ export default class Home extends Component {
   }
 
   checkoutHandler = () => {
-    let url = 'http://10.0.2.2:5000/checkout';
+    let url = `${API.baseUrl}/checkout`;
     const header = {
       headers: {
         Authorization: `Bearer ${this.state.token}`,
@@ -145,6 +157,8 @@ export default class Home extends Component {
           invoice,
           date: orderDate,
         });
+
+        ToastAndroid.show('Checkout Successfully', ToastAndroid.LONG);
       })
       .catch(error => {
         console.log(error);
@@ -154,20 +168,64 @@ export default class Home extends Component {
       });
   };
 
+  cancelCheckoutConfirm = () => {
+    Alert.alert(
+      'Are you sure to cancel checkout?',
+      'If you cancel checkout, the cart will be emptied.',
+      [
+        {
+          text: 'No',
+          style: 'cancel',
+        },
+        {text: 'Yes', onPress: this.cancelCheckoutHandler},
+      ],
+    );
+  };
+
+  cancelCheckoutHandler = () => {
+    this.setState({
+      selectedId: [],
+      cart: [],
+      cartTotal: 0,
+    });
+  };
+
   render() {
     return (
       <>
         <Container>
-          <Header hasTabs />
+          <Header
+            hasTabs
+            androidStatusBarColor="#ba000d"
+            style={styles.backgroundColorDefault}>
+            <Body style={styles.headerTitle}>
+              <Title>Padang Restaurant</Title>
+            </Body>
+          </Header>
           <Tabs>
-            <Tab heading="Menu">
+            <Tab
+              heading={
+                <TabHeading style={styles.backgroundColorDefault}>
+                  <Icon style={styles.colorDefault} name="restaurant" />
+                  <Text style={styles.colorDefault}>Menu</Text>
+                </TabHeading>
+              }>
               <Menu
                 menu={this.state.data}
                 addToCartPress={id => this.addToCartHandler(id)}
                 selected={this.state.selectedId}
               />
             </Tab>
-            <Tab heading="Cart">
+            <Tab
+              heading={
+                <TabHeading style={styles.backgroundColorDefault}>
+                  <Icon style={styles.colorDefault} name="cart" />
+                  <Text style={styles.colorDefault}>Cart</Text>
+                  <Badge style={styles.badge}>
+                    <Text>{this.state.cartTotal}</Text>
+                  </Badge>
+                </TabHeading>
+              }>
               <Cart
                 cart={this.state.cart}
                 modalCheckoutVisible={this.state.modalCheckoutVisible}
@@ -176,6 +234,7 @@ export default class Home extends Component {
                 orderDate={this.state.date}
                 username={this.state.username}
                 onPressCheckoutButton={this.checkoutHandler}
+                onPressCancelCheckout={this.cancelCheckoutConfirm}
               />
             </Tab>
           </Tabs>
@@ -191,5 +250,14 @@ const styles = StyleSheet.create({
   },
   backgroundColorOther: {
     backgroundColor: '#ba000d',
+  },
+  colorDefault: {
+    color: '#fff',
+  },
+  headerTitle: {
+    alignItems: 'center',
+  },
+  badge: {
+    backgroundColor: '#ff7961',
   },
 });

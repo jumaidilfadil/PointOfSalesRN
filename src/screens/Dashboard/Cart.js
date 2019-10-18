@@ -1,5 +1,13 @@
 import React from 'react';
-import {StyleSheet, View, SafeAreaView, ScrollView, Modal} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  SafeAreaView,
+  ScrollView,
+  Modal,
+  Alert,
+  Image,
+} from 'react-native';
 import {
   Content,
   Text,
@@ -15,8 +23,11 @@ import {
   List,
   ListItem,
 } from 'native-base';
-import dateFormat from 'dateformat';
+
+import {API} from '../../configs/api';
 import RupiahFormat from '../../helpers/RupiahFormat';
+
+import emptyCartImg from '../../assets/images/coffee.png';
 
 const _renderCart = (
   cart,
@@ -26,6 +37,7 @@ const _renderCart = (
   orderDate,
   username,
   onPressCheckoutButton,
+  onPressCancelCheckout,
 ) => {
   if (cart.length > 0) {
     var total = 0;
@@ -41,7 +53,7 @@ const _renderCart = (
             <CardItem>
               <Left>
                 <Thumbnail
-                  source={{uri: `http://10.0.2.2:5000/uploads/${item.image}`}}
+                  source={{uri: `${API.baseUrl}/uploads/${item.image}`}}
                 />
                 <Body>
                   <Text>{item.name}</Text>
@@ -61,12 +73,15 @@ const _renderCart = (
           }}>
           <Text>Checkout</Text>
         </Button>
+        <Button block danger bordered onPress={onPressCancelCheckout}>
+          <Text>Cancel</Text>
+        </Button>
         <Modal
           animationType="slide"
           transparent={false}
           visible={modalCheckoutVisible}
           onRequestClose={() => {
-            Alert.alert('Modal has been closed.');
+            Alert.alert('Checkout modal has been closed.');
           }}>
           <Container>
             <Content style={{marginHorizontal: 10, marginVertical: 50}}>
@@ -141,7 +156,16 @@ const _renderCart = (
     );
   } else {
     return (
-      <H1 style={{margin: 10, textAlign: 'center'}}>Your cart is empty.</H1>
+      <Container
+        style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Content padder>
+          <Image source={emptyCartImg} style={{width: 300, height: 300}} />
+          <H1 style={{textAlign: 'center'}}>Your cart is empty.</H1>
+          <Text style={{color: '#888', textAlign: 'center'}}>
+            Please add some items from the menu.
+          </Text>
+        </Content>
+      </Container>
     );
   }
 };
@@ -151,9 +175,9 @@ const Cart = props => (
     <SafeAreaView>
       <ScrollView style={{padding: 10}}>
         {props.cart == null ? (
-          <div className="col">
-            <p>Loading...</p>
-          </div>
+          <View style={{flex: 1, justifyContent: 'center'}}>
+            <Spinner color="#f44336" />
+          </View>
         ) : (
           _renderCart(
             props.cart,
@@ -163,6 +187,7 @@ const Cart = props => (
             props.orderDate,
             props.username,
             props.onPressCheckoutButton,
+            props.onPressCancelCheckout,
           )
         )}
       </ScrollView>

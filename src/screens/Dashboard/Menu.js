@@ -59,7 +59,7 @@ const Menu = props => (
             <CardMenu
               menu={props.menu}
               addToCartPress={id => props.addToCartPress(id)}
-              selected={props.selectedId}
+              selected={props.selected}
             />
           </View>
         </View>
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ba000d',
   },
   scrollView: {
-    backgroundColor: '#ffebee',
+    backgroundColor: '#fafafa',
   },
   containerInputSearch: {
     height: 100,

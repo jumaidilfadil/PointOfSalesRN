@@ -13,6 +13,7 @@ import {
 import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
 
+import {API} from '../../configs/api';
 import bgLogin from '../../assets/images/waiter-welcome.png';
 
 export default class Login extends Component {
@@ -30,7 +31,7 @@ export default class Login extends Component {
 
   loginHandler = () => {
     const {username, password} = this.state;
-    const url = 'http://10.0.2.2:5000/user/login';
+    const url = `${API.baseUrl}/user/login`;
     const payload = {
       username,
       password,

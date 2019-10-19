@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet} from 'react-native';
+import {StyleSheet, RefreshControl, ActivityIndicator} from 'react-native';
 import {
   Container,
   Header,
@@ -30,15 +30,16 @@ export default class History extends Component {
   constructor() {
     super();
     this.state = {
+      token: '',
       loading: 'Loading...',
       recentOrders: null,
-      token: '',
       todayIncome: null,
       percentFromYesterday: null,
       ordersThisWeek: null,
       percentOrdersLastWeek: null,
       thisYearIncome: null,
       percentLastYearIncome: null,
+      refreshing: true,
     };
   }
 
@@ -62,6 +63,7 @@ export default class History extends Component {
         const recentOrders = result.data.data ? result.data.data : [];
         this.setState({
           recentOrders,
+          refreshing: false,
         });
       })
       .catch(err => {
@@ -69,7 +71,7 @@ export default class History extends Component {
       });
   };
 
-  getTodayIncome = () => {
+  getIncome = () => {
     const url = `${API.baseUrl}/history/income`;
     const header = {
       headers: {
@@ -79,6 +81,18 @@ export default class History extends Component {
     axios
       .get(url, header)
       .then(result => {
+        let todayIncome;
+        result.data.data[0].today_income
+          ? (todayIncome = RupiahFormat(result.data.data[0].today_income))
+          : (todayIncome = RupiahFormat(0));
+
+        let percentFromYesterday;
+        result.data.data[0].percent_from_yesterday
+          ? (percentFromYesterday = PercentFormat(
+              result.data.data[0].percent_from_yesterday,
+            ))
+          : (percentFromYesterday = 'Nothing Order in ');
+
         let percentOrdersLastWeek;
         result.data.data[0].percent_orders_last_week
           ? (percentOrdersLastWeek = PercentFormat(
@@ -94,12 +108,13 @@ export default class History extends Component {
           : (percentLastYearIncome = 'Nothing Income in ');
 
         this.setState({
-          todayIncome: result.data.data[0].today_income,
-          percentFromYesterday: result.data.data[0].percent_from_yesterday,
+          todayIncome,
+          percentFromYesterday,
           ordersThisWeek: result.data.data[0].orders_this_week,
           percentOrdersLastWeek,
           thisYearIncome: result.data.data[0].this_year_income,
           percentLastYearIncome,
+          refreshing: false,
         });
       })
       .catch(err => {
@@ -110,10 +125,34 @@ export default class History extends Component {
   async componentDidMount() {
     await this.getToken();
     this.getRecentOrders();
-    this.getTodayIncome();
+    this.getIncome();
+  }
+
+  onRefresh() {
+    //Clear old data of the list
+    this.setState({
+      recentOrders: null,
+      todayIncome: null,
+      percentFromYesterday: null,
+      ordersThisWeek: null,
+      percentOrdersLastWeek: null,
+      thisYearIncome: null,
+      percentLastYearIncome: null,
+    });
+    //Call the Service to get the latest data
+    this.getRecentOrders();
+    this.getIncome();
   }
 
   render() {
+    if (this.state.refreshing) {
+      return (
+        //loading view while data is loading
+        <View style={{flex: 1, paddingTop: 20}}>
+          <ActivityIndicator />
+        </View>
+      );
+    }
     return (
       <Container>
         <Header
@@ -123,7 +162,14 @@ export default class History extends Component {
             <Title>Padang Restaurant</Title>
           </Body>
         </Header>
-        <Content padder>
+        <Content
+          padder
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this.onRefresh.bind(this)}
+            />
+          }>
           <Grid>
             <Col style={styles.colTodayIncome}>
               <Card style={styles.cardTodayIncome}>
@@ -134,13 +180,13 @@ export default class History extends Component {
                       <Spinner color="#f44336" />
                     ) : (
                       <Text style={styles.cardText}>
-                        {RupiahFormat(this.state.todayIncome)}
+                        {this.state.todayIncome}
                       </Text>
                     )}
                     <Text style={styles.cardNote}>
                       {this.state.percentFromYesterday == null
                         ? this.state.loading
-                        : PercentFormat(this.state.percentFromYesterday)}{' '}
+                        : this.state.percentFromYesterday}{' '}
                       Yesterday
                     </Text>
                   </Body>
@@ -152,7 +198,7 @@ export default class History extends Component {
                 <CardItem style={styles.cardOrders}>
                   <Body style={styles.cardBody}>
                     <H1 style={styles.cardTitle}>Orders</H1>
-                    {this.state.todayIncome == null ? (
+                    {this.state.ordersThisWeek == null ? (
                       <Spinner color="#f44336" />
                     ) : (
                       <Text style={styles.cardText}>
@@ -160,7 +206,7 @@ export default class History extends Component {
                       </Text>
                     )}
                     <Text style={styles.cardNote}>
-                      {this.state.percentFromYesterday == null
+                      {this.state.percentOrdersLastWeek == null
                         ? this.state.loading
                         : this.state.percentOrdersLastWeek}{' '}
                       Last Week
@@ -176,7 +222,7 @@ export default class History extends Component {
                 <CardItem style={styles.cardYearIncome}>
                   <Body style={styles.cardBody}>
                     <H1 style={styles.cardTitle}>This Year's Income</H1>
-                    {this.state.todayIncome == null ? (
+                    {this.state.thisYearIncome == null ? (
                       <Spinner color="#f44336" />
                     ) : (
                       <Text style={styles.cardText}>

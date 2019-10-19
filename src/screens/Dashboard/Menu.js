@@ -101,17 +101,18 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     paddingHorizontal: 10,
-    paddingTop: 30,
-    elevation: 25,
+    paddingTop: 15,
+    elevation: 20,
   },
   title: {
     fontSize: 20,
+    textAlign: 'center',
   },
   contentCategory: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   categoryItem: {
     width: 62,
@@ -139,6 +140,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'flex-start',
+    justifyContent: 'center',
+    width: '100%',
   },
 });
 

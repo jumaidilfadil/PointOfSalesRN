@@ -1,5 +1,5 @@
-import {BASE_URL} from 'react-native-dotenv';
+// import {BASE_URL} from 'react-native-dotenv';
 
 export const API = {
-  baseUrl: BASE_URL,
+  baseUrl: 'http://54.210.198.53:5000',
 };

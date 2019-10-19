@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f44336',
   },
   card: {
-    width: '49%',
+    width: '47%',
   },
   buttonCartText: {
     textAlign: 'center',

@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   ToastAndroid,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
@@ -22,6 +23,7 @@ export default class Login extends Component {
     this.state = {
       username: '',
       password: '',
+      isLoading: false,
     };
   }
 
@@ -30,6 +32,7 @@ export default class Login extends Component {
   };
 
   loginHandler = () => {
+    this.setState({isLoading: true});
     const {username, password} = this.state;
     const url = `${API.baseUrl}/user/login`;
     const payload = {
@@ -46,6 +49,7 @@ export default class Login extends Component {
         this.props.navigation.navigate('App');
       })
       .catch(error => {
+        this.setState({isLoading: false});
         ToastAndroid.showWithGravityAndOffset(
           'Invalid Username/Password!',
           ToastAndroid.LONG,
@@ -86,42 +90,17 @@ export default class Login extends Component {
               <TouchableOpacity
                 style={styles.buttonLogin}
                 onPress={this.loginHandler}>
-                <Text style={styles.buttonLoginText}>Login</Text>
+                {this.state.isLoading === true ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonLoginText}>Login</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
         </KeyboardAvoidingView>
       </>
     );
-    /*
-    return (
-      <Container>
-        <Content style={{marginHorizontal: 30}}>
-          <Form>
-            <Item floatingLabel last>
-              <Label>Username</Label>
-              <Input
-                autoCapitalize="none"
-                value={this.state.username}
-                onChangeText={text => this.setState({username: text})}
-              />
-            </Item>
-            <Item floatingLabel last>
-              <Label>Password</Label>
-              <Input
-                secureTextEntry
-                value={this.state.password}
-                onChangeText={text => this.setState({password: text})}
-              />
-            </Item>
-            <Button block style={{marginTop: 30}} onPress={this.loginHandler}>
-              <Text>Login</Text>
-            </Button>
-          </Form>
-        </Content>
-      </Container>
-    );
-    */
   }
 }
 
